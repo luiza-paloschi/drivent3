@@ -17,13 +17,23 @@ async function findAllHotels(userId: number) {
   await verifyData(userId);
 
   const hotels = await hotelsRepository.findAllHotels();
-  if (!hotels) throw notFoundError;
+  if (hotels.length === 0) throw notFoundError();
 
   return hotels;
 }
 
+async function findHotelWithRooms(userId: number, hotelId: number) {
+  await verifyData(userId);
+
+  const hotelWithRooms = await hotelsRepository.findHotelWithRooms(hotelId);
+  if (!hotelWithRooms) throw notFoundError();
+
+  return hotelWithRooms;
+}
+
 const hotelsService = {
   findAllHotels,
+  findHotelWithRooms,
 };
 
 export default hotelsService;

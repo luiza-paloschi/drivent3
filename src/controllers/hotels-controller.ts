@@ -10,3 +10,14 @@ export async function getAllHotels(req: AuthenticatedRequest, res: Response, nex
     next(error);
   }
 }
+
+export async function findHotelWithRooms(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  const hotelId = req.params.hotelId as string;
+
+  try {
+    const hotelWithRooms = await hotelsService.findHotelWithRooms(req.userId, Number(hotelId));
+    return res.status(200).send(hotelWithRooms);
+  } catch (error) {
+    next(error);
+  }
+}
