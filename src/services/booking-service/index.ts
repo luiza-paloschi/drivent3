@@ -2,6 +2,12 @@ import { forbiddenError, notFoundError } from '@/errors';
 import bookingRepository from '@/repositories/booking-repository';
 import enrollmentRepository from '@/repositories/enrollment-repository';
 
+async function checkRoomAvailability(roomId: number) {
+  const room = await bookingRepository.findRoomById(roomId);
+  if (!room) throw notFoundError();
+  if (room.Booking.length >= room.capacity) throw forbiddenError('No vacancies!');
+}
+
 async function findBooking(userId: number) {
   const booking = await bookingRepository.findBooking(userId);
   if (!booking) throw notFoundError();
@@ -17,23 +23,20 @@ async function createBooking(userId: number, roomId: number) {
   if (ticket.status !== 'PAID' || ticket.TicketType.isRemote || !ticket.TicketType.includesHotel)
     throw forbiddenError('Cannot book hotel for this ticket');
 
-  const room = await bookingRepository.findRoomById(roomId);
-  if (!room) throw notFoundError();
-  if (room.Booking.length >= room.capacity) throw forbiddenError('No vacancies!');
+  await checkRoomAvailability(roomId);
 
   const booking = await bookingRepository.createBooking(userId, roomId);
   return booking;
 }
 
-async function updateBooking(userId: number, roomId: number) {
+async function updateBooking(userId: number, bookingId: number, roomId: number) {
   const booking = await bookingRepository.findBooking(userId);
   if (!booking) throw forbiddenError('User has no booking available!');
+  if (booking.id !== bookingId) throw forbiddenError('User has no permission to update booking');
 
-  const room = await bookingRepository.findRoomById(roomId);
-  if (!room) throw notFoundError();
-  if (room.Booking.length >= room.capacity) throw forbiddenError('No vacancies!');
+  await checkRoomAvailability(roomId);
 
-  const updatedBooking = await bookingRepository.updateBooking(booking.id, roomId);
+  const updatedBooking = await bookingRepository.updateBooking(bookingId, roomId);
   return updatedBooking;
 }
 
