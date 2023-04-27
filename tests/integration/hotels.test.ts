@@ -230,32 +230,32 @@ describe('GET /hotels/:hotelId', () => {
       expect(response.status).toEqual(httpStatus.NOT_FOUND);
     });
 
-    it('should respond with status 200 and hotel data', async () => {
+    it('should respond with status 200 and hotel and room data', async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
       const enrollment = await createEnrollmentWithAddress(user);
       const ticketType = await createCustomizedTicketType(false, true);
       await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
       const createdHotel = await createHotel();
-      const hotelWithRooms = await createRoom(createdHotel.id);
+      const room = await createRoom(createdHotel.id);
 
       const response = await server.get(`/hotels/${createdHotel.id}`).set('Authorization', `Bearer ${token}`);
 
       expect(response.status).toEqual(httpStatus.OK);
       expect(response.body).toEqual({
-        id: hotelWithRooms.id,
-        name: hotelWithRooms.name,
-        image: hotelWithRooms.image,
-        createdAt: hotelWithRooms.createdAt.toISOString(),
-        updatedAt: hotelWithRooms.updatedAt.toISOString(),
+        id: createdHotel.id,
+        name: createdHotel.name,
+        image: createdHotel.image,
+        createdAt: createdHotel.createdAt.toISOString(),
+        updatedAt: createdHotel.updatedAt.toISOString(),
         Rooms: [
           {
-            id: hotelWithRooms.Rooms[0].id,
-            name: hotelWithRooms.Rooms[0].name,
-            capacity: hotelWithRooms.Rooms[0].capacity,
-            hotelId: hotelWithRooms.Rooms[0].hotelId,
-            createdAt: hotelWithRooms.Rooms[0].createdAt.toISOString(),
-            updatedAt: hotelWithRooms.Rooms[0].updatedAt.toISOString(),
+            id: room.id,
+            name: room.name,
+            capacity: room.capacity,
+            hotelId: room.hotelId,
+            createdAt: room.createdAt.toISOString(),
+            updatedAt: room.updatedAt.toISOString(),
           },
         ],
       });
